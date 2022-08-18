@@ -10,7 +10,7 @@ class UsersController < ApplicationController
             render json: @user.errors, status: :unprocessable_entity
         end
     end
-    
+
     private
      # Only allow a list of trusted parameters through.
     def user_params

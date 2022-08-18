@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_08_18_051329) do
+ActiveRecord::Schema[7.0].define(version: 2022_08_18_054917) do
   create_table "clients", force: :cascade do |t|
     t.string "email"
     t.string "first_name"
@@ -87,6 +87,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_18_051329) do
     t.boolean "is_admin"
     t.integer "credits", default: 0
     t.boolean "is_member", default: false
+    t.string "member_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

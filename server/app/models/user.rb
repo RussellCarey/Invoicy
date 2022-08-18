@@ -35,25 +35,4 @@ class User < ApplicationRecord
   has_many :clients
   has_many :invoices, through: :clients
 
-      # PATCH
-    def self.set_premium_member(user_id, status)
-        @user = User.find(user_id)
-        if @user.update(:is_member: status)
-            render json: @user
-        else
-            render json: @user.errors, status: :unprocessable_entity
-        end
-    end
-
-    # PATCH
-    def self.add_credits_to_user(user_id, value)
-        @user = User.find(user_id)
-        @user.credits += value
-
-        if @user.save
-            render json: @user
-        else
-            render json: @user.errors, status: :unprocessable_entity
-        end
-    end
 end

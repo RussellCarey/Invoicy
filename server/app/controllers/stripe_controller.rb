@@ -3,6 +3,8 @@ require 'stripe'
 
 # gem 'figaro' - bundle exec figaro install - use ENV 
 class StripeController < ApplicationController
+    include PaymentResults
+
     before_action :authenticate_user!, only: %i[ create_checkout_session, create_subscription_session, create_product, get_all_products, get_product ]
     before_action :check_user_id_admin, only: %i[ create_product ]
     Stripe.api_key = ENV["stripe_api_key"]
@@ -46,6 +48,10 @@ class StripeController < ApplicationController
 
         render json: {sessionURL:  session.url}, status: :ok
     end
+
+    def cancel_subscription
+        Stripe::Subscription.update('sub_49ty4767H20z6a', {cancel_at_period_end: true})
+    end
     
     # ADMIN
     def create_product
@@ -62,6 +68,14 @@ class StripeController < ApplicationController
         render json: {product: new_product}, status: :ok
     end
 
+    # Subscriptions
+    def get_all_subscriptions 
+        limit = params[:limit] ||= 100;
+        subscriptions = Stripe::Subscription.list({limit: 3})
+        render json: {subscriptions: subscriptions}, status: :ok
+    end
+
+    # Products
     def get_all_products
         limit = params[:limit] ||= 100;
         products = Stripe::Product.list({limit: limit})
@@ -84,41 +98,20 @@ class StripeController < ApplicationController
     # stripe listen --forward-to localhost:3000/stripe/webhook
     # https://stripe.com/docs/api/events/types
     def webhook
-        puts "WEBOOK FOR STRIPE HAS BEEN FIRED"
         payload = request.body.read
-        event = nil
+        event = Stripe::Event.construct_from(JSON.parse(payload, symbolize_names: true))
 
-        event = Stripe::Event.construct_from(
-            JSON.parse(payload, symbolize_names: true)
-        )
+        case event.type            
+            when 'customer.subscription.deleted'
+                set_premium_member(event.data.object.metadata.user_id, false, nil)
 
-        puts event.type
-        puts event.data.object.metadata
-
-        case event.type
-            when 'payment_intent.created'
-                puts "PAYMENT METHOD CREATEDDD"
-
-            when 'payment_intent.succeeded'
-                puts "PAYMENT METHOD SUCCESSDD"
-                # payment_intent = event.data.object # contains a Stripe::PaymentIntent
-                # Then define and call a method to handle the successful payment intent.
-                # handle_payment_intent_succeeded(payment_intent)
-
-            when 'charge.succeeded'
-                puts "PAYMENT CHARGE SUCCEEDED"
-                
-                user = User.find(event.data.object.metadata.user_id)
-                user.credits += 200;
-                user.save
-
-            when 'customer.subscription.created'
-                puts "A SUBSCRIPTION HAS BEEN MADE"
-
-                user = User.find(event.data.object.metadata.user_id)
-                user.is_member = true;
-                user.save
-
+            when 'invoice.payment_succeeded'
+                if event.data.object.lines.data[0].type === "subscription"
+                    # Saves subscription reference to user and changes their membership status to true..
+                    set_premium_member(event.data.object.lines.data[0].metadata.user_id, true, event.data.object.lines.data[0].subscription)
+                else
+                    add_credits_to_user(event.data.object.lines.data[0].metadata.user_id, 200)
+                end
             else
                 puts "Unhandled event type: #{event.type}"
         end
