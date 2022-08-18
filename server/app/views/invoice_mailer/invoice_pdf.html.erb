@@ -1,0 +1,176 @@
+<html>
+   <head>
+      <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+   </head>
+   <style>
+      * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      color: #5F7283;
+      font-weight: 16px;
+      }
+      .invoice-container {
+      width: 100%;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      }
+      .title {
+      width: 100%;
+      color: #8793FD;
+      letter-spacing: 3;
+      border-bottom: grey 1px;
+      margin-bottom: 30px;
+      }
+      .address-container {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 30px;
+      }
+      .subtitle {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      }
+      .left-side {
+      flex: 1;
+      }
+      .address {
+      margin-bottom: 10px;
+      }
+      .dates {
+      flex: 1;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      }
+      .cost-container {
+      width: 100%;
+      }
+      .row-header {
+      background-color: #F7F7F7;
+      margin-bottom: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 5px;
+      }
+      .row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px
+      }
+      .total-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      }
+      .details {
+      width: 100%;
+      }
+      .cell {
+      width: 30%;
+      }
+   </style>
+   <div class="invoice-container">
+      <h1 class="title"> INVOICY </h1>
+      <div class="address-container">
+         <div class="left-side">
+            <div class="address">
+               <p class="subtitle">Invoice from:</p>
+               <p class="addresses-text">
+                  <%= invoice.client.user.address_number %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.user.address_street %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.user.address_city %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.user.address_county %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.user.address_postcode %>
+               </p>
+            </div>
+            <div class="address">
+               <p class="subtitle">Invoice to:</p>
+               <p class="addresses-text">
+                  <%= invoice.client.address_number %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.address_street %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.address_city %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.address_county %>
+               </p>
+               <p class="addresses-text">
+                  <%= invoice.client.address_postcode %>
+               </p>
+            </div>
+         </div>
+         <div class="dates">
+            <p class="date">Issued: <%= invoice.issue_date.to_s.slice(0..10) %>
+            </p>
+            <p class="date">Due: <%= invoice.due_date.to_s.slice(0..10) %>
+            </p>
+         </div>
+      </div>
+      <div class="cost-container">
+         <h5 class="subtitle">
+            <%= invoice.title %>
+         </h5>
+         <div class="costs">
+            <div class="row-header">
+               <div class="details">
+                  Details
+               </div>
+               <div class="cell">
+                  Price
+               </div>
+               <div class="cell">
+                  QTY
+               </div>
+               <div class="cell">
+                  Subtotal
+               </div>
+            </div>
+            <% invoice_items.each do |item| %>
+            <div class="row">
+               <div class="details">
+                  <%= item.details %>
+               </div>
+               <div class="cell">
+                  <%= item.price %>
+               </div>
+               <div class="cell">
+                  <%= item.amount %>
+               </div>
+               <div class="cell">
+                  <%= item.amount * item.price %>
+               </div>
+            </div>
+            <% end %>
+            <div class="total-row">
+               <div class="details">
+               </div>
+               <div class="cell">
+               </div>
+               <div class="cell">
+               </div>
+               <div class="cell">
+                  <%= invoice.total %>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</html>

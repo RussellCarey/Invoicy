@@ -1,0 +1,13 @@
+<p>Welcome <%= @email %>!</p>
+
+<p>You can confirm your account email through the link below:</p>
+
+  <!-- 
+  Change this to WEBSITEURL/confirm?confirmation_token=yx_KV3-zV6CWbj_mXMd7 
+  and have a FETCH on the front end that has this link 
+  to confirm the account - it will then return JSON.. to the front end
+  rather than trying to open straight from the URL provided by devise.
+  -->
+
+ <!-- LINK BELOW IS EXAMPLE -- use confirmation_url(@resource, confirmation_token: @token) as FETCH on frontend -->
+<p><%= link_to 'Confirm my account', "www.invoicy.com/confirm_email?=token=#{@token}" %></p>
