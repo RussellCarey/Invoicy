@@ -3,54 +3,28 @@ require 'stripe'
 
 # gem 'figaro' - bundle exec figaro install - use ENV 
 class StripeController < ApplicationController
-    include PaymentResults
+    include PaymentUtils
 
-    before_action :authenticate_user!, only: %i[ create_checkout_session, create_subscription_session, create_product, get_all_products, get_product ]
-    before_action :check_user_id_admin, only: %i[ create_product ]
+    before_action :authenticate_user!, only: %i[ create_checkout_session, create_subscription_session, create_product, get_all_products, get_product cancel_subscription ]
+    before_action :check_user_id_admin, only: %i[ create_product  get_all_subscriptions  ]
     Stripe.api_key = ENV["stripe_api_key"]
 
     # Redirect user to pre-built checkout page with defined URLS for their redirect.
     def create_checkout_session
         price_id = params[:price_id]
         product_qty = params[:qty]
-
         return render json: { message: "Missing price or qty"}, status: :not_found if price_id.nil? || product_qty.nil?
 
-        session = Stripe::Checkout::Session.create({
-            line_items: [{
-            price: price_id,
-            quantity: product_qty,
-            }],
-            payment_intent_data: { metadata: { user_id: 4}},
-            metadata: {user_id: current_user.id},
-            mode: 'payment',
-            success_url: 'https://localhost:3000/success.html',
-            cancel_url: 'https://localhost:3000/cancel.html',
-        })
-
+        session = create_payment(4, price_id, product_qty);
         render json: {sessionURL:  session.url}, status: :ok
     end
 
     def create_subscription_session
         price_id = params[:price_id]
-        puts params[:price_id]
+        return render json: { message: "Missing price or qty"}, status: :not_found if price_id.nil?
 
-        session = Stripe::Checkout::Session.create({
-            mode: 'subscription',
-            line_items: [{
-                quantity: 1,
-                price: price_id,
-            }],
-            subscription_data: { metadata: {user_id: 4}},
-            success_url: 'https://localhost:3000/success.html?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url: 'https://localhost:3000/cancel.html',
-        })
-
+        session = create_subscription(4, price_id, 1);
         render json: {sessionURL:  session.url}, status: :ok
-    end
-
-    def cancel_subscription
-        Stripe::Subscription.update('sub_49ty4767H20z6a', {cancel_at_period_end: true})
     end
     
     # ADMIN
@@ -73,6 +47,18 @@ class StripeController < ApplicationController
         limit = params[:limit] ||= 100;
         subscriptions = Stripe::Subscription.list({limit: 3})
         render json: {subscriptions: subscriptions}, status: :ok
+    end
+
+    # errors?
+    def cancel_subscription
+        delete_now = params[:now]
+        user_subscription_token = current_user.member_id
+
+        if delete_now
+            Stripe::Subscription.update(user_subscription_token, {cancel_at_period_end: true})
+        else
+            Stripe::Subscription.delete(user_subscription_token)
+        end
     end
 
     # Products
@@ -103,6 +89,7 @@ class StripeController < ApplicationController
 
         case event.type            
             when 'customer.subscription.deleted'
+                ## Neeeds changing?
                 set_premium_member(event.data.object.metadata.user_id, false, nil)
 
             when 'invoice.payment_succeeded'

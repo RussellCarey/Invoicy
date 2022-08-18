@@ -42,6 +42,7 @@ scope "/stripe" do
     post '/create_product', to: 'stripe#create_product'
     get '/get_all', to: 'stripe#get_all_products'
     get '/get_product/:product_id', to: 'stripe#get_product'
+    delete '/cancel_subsciption', to: 'stripe#cancel_subscription'
     post '/webhook', to: 'stripe#webhook'
   end
 
