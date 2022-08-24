@@ -2,7 +2,7 @@
 
 class InvoiceMailer < ApplicationMailer
     # The default method sets default values for all emails sent
-    default from: 'admin@invoicy.com'
+ default from: 'admin@invoicy.com'
 
     def invoice_email
         @client = params[:client]

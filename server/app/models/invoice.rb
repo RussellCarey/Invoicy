@@ -14,6 +14,8 @@ class Invoice < ApplicationRecord
     after_initialize :defaults
 
     # Filters 
+    #! Filter by array and user params from array - if nil then wouldnt run the condiiton..
+    # Filter by duraion / properties..
     scope :filter_by_status, -> (status) { where("status = ?", status) }
     scope :filter_due_date, -> (due_date) { where("due_date = ?", due_date) }
     scope :filter_due_date_gt, -> (due_date) { where("due_date > ?", due_date) }

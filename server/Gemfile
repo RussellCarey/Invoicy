@@ -41,6 +41,7 @@ gem 'grover'
 gem 'figaro'
 
 group :development, :test do
+  gem 'rspec-rails'
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
 end
@@ -54,5 +55,4 @@ end
 gem "devise", "~> 4.8"
 gem "devise-jwt", "~> 0.9.0"
 gem "rack-cors", "~> 1.1"
-
 gem "stripe", "~> 7.0"
