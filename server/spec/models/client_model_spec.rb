@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'api_helper'
 
 RSpec.describe Client do
 
