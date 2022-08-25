@@ -6,7 +6,7 @@ class StripeController < ApplicationController
     include PaymentUtils
 
     before_action :authenticate_user!, only: %i[ create_checkout_session, create_subscription_session, create_product, get_all_products, get_product cancel_subscription ]
-    before_action :check_user_id_admin, only: %i[ create_product  get_all_subscriptions  ]
+    before_action :check_user_id_admin, only: %i[ create_product  get_all_subscriptions ]
     Stripe.api_key = ENV["stripe_api_key"]
 
     # Redirect user to pre-built checkout page with defined URLS for their redirect.
@@ -27,25 +27,10 @@ class StripeController < ApplicationController
         render json: {sessionURL:  session.url}, status: :ok
     end
     
-    # ADMIN
-    def create_product
-        product_name = params[:name]
-        product_price = params[:price]
-
-        price_data = {
-            currency: 'jpy',
-            unit_amount: product_price
-        }
-
-        new_product = Stripe::Product.create({name: product_name, default_price_data: price_data })
-
-        render json: {product: new_product}, status: :ok
-    end
-
     # Subscriptions
     def get_all_subscriptions 
         limit = params[:limit] ||= 100;
-        subscriptions = Stripe::Subscription.list({limit: 3})
+        subscriptions = Stripe::Subscription.list({limit: limit})
         render json: {subscriptions: subscriptions}, status: :ok
     end
 
@@ -62,6 +47,20 @@ class StripeController < ApplicationController
     end
 
     # Products
+    def create_product
+        product_name = params[:name]
+        product_price = params[:price]
+
+        price_data = {
+            currency: 'jpy',
+            unit_amount: product_price
+        }
+
+        new_product = Stripe::Product.create({name: product_name, default_price_data: price_data })
+
+        render json: {product: new_product}, status: :ok
+    end
+
     def get_all_products
         limit = params[:limit] ||= 100;
         products = Stripe::Product.list({limit: limit})
@@ -94,21 +93,16 @@ class StripeController < ApplicationController
 
             when 'invoice.payment_succeeded'
                 if event.data.object.lines.data[0].type === "subscription"
-                    # Saves subscription reference to user and changes their membership status to true..
                     set_premium_member(event.data.object.lines.data[0].metadata.user_id, true, event.data.object.lines.data[0].subscription)
                 else
                     add_credits_to_user(event.data.object.lines.data[0].metadata.user_id, 200)
                 end
-            else
-                puts "Unhandled event type: #{event.type}"
         end
-
-        render json: {message: "test"}, status: :ok
     end
 
     private
     def check_user_id_admin
-            return render json: {message: "You are not an admin"}, status: :unauthorized unless current_user.is_admin
+        return render json: { message: "You are not an admin and cannot access this resource" }, status: :unauthorized unless current_user.is_admin
      end
 end
 

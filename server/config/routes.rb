@@ -41,6 +41,7 @@ scope "/stripe" do
     post '/create_subscription_session', to: 'stripe#create_subscription_session'
     post '/create_product', to: 'stripe#create_product'
     get '/get_all', to: 'stripe#get_all_products'
+    get '/get_all_subscriptions', to: 'stripe#get_all_subscriptions'
     get '/get_product/:product_id', to: 'stripe#get_product'
     delete '/cancel_subsciption', to: 'stripe#cancel_subscription'
     post '/webhook', to: 'stripe#webhook'
