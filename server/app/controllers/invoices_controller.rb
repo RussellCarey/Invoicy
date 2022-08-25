@@ -124,4 +124,20 @@ class InvoicesController < ApplicationController
 
       return invoices
     end
+
+    # def search_invoice_with_params
+    #   page = params[:page].to_i
+    #   page_size = (params[:limit] || 10).to_i
+
+    #   param_list = ['status', 'due_date', 'due_date_gt', 'due_date_lt', 'issue_date', 'issue_date_gt', 'issue_date_lt', 'total', 'total_gt', 'total_lt']
+    #   invoices = Invoice.all
+      
+    #   param_list.each do |par|
+    #      invoices = invoices.filter_by_status(params[par]) if params[par].present?
+    #   end
+
+    #   invoices.offset(page * page_size).limit(page_size)
+
+    #   return invoices
+    # end
 end

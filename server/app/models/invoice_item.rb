@@ -12,6 +12,8 @@ class InvoiceItem < ApplicationRecord
     after_update :update_parent_invoice_total
 
     validates :details, presence: :true, length: {minimum: 3, maximum: 50}
+    validates :amount, presence: :true
+    validates :price, presence: :true
 
     private
     def defaults

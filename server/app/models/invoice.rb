@@ -30,8 +30,12 @@ class Invoice < ApplicationRecord
     #Validations
     validates :title, presence: :true, length: { minimum: 1, maximum: 30 }
     validates :issue_date, presence: :true
-    validates :due_date, presence: :true
+    validates :due_date, presence: :true, comparison: { greater_than: Date.today }
     validates :status, presence: :true
+    validates :tax, numericality: { in: 0..100}
+    validates :discount, numericality: { in: 0..100}
+    validates :client_id, presence: :true
+    validates :user_id, presence: :true
 
 
     def get_total
