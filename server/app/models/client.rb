@@ -16,14 +16,14 @@ class Client < ApplicationRecord
     has_many :invoices
 
     #Validations
-    validates :email, presence: :true
-    validates :first_name, presence: :true
-    validates :last_name, presence: :true
-    validates :address_number, presence: :true
-    validates :address_street, presence: :true
-    validates :address_city, presence: :true
-    validates :address_county, presence: :true
-    validates :address_postcode, presence: :true
+    validates :email, presence: :true, format: { with: URI::MailTo::EMAIL_REGEXP }
+    validates :first_name, presence: :true, length: {minimum: 3, maximum: 20}
+    validates :last_name, presence: :true, length: {minimum: 3, maximum: 20}
+    validates :address_number, presence: :true, numericality: { in: 1..999 }
+    validates :address_street, presence: :true, length: {minimum: 3, maximum: 30}
+    validates :address_city, presence: :true, length: {minimum: 3, maximum: 20}
+    validates :address_county, presence: :true, length: {minimum: 3, maximum: 20}
+    validates :address_postcode, presence: :true, length: {minimum: 7, maximum: 9}
     validates :user_id, presence: :true
 end
 

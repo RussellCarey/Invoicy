@@ -33,9 +33,9 @@ class ClientsController < ApplicationController
     client.user_id = current_user.id
 
     if @client.save
-      render json: cclient, status: :created
+      render json: client, status: :created
     else
-      render json: cclient.errors, status: :unprocessable_entity
+      render json: client.errors, status: :unprocessable_entity
     end
   end
 
