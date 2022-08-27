@@ -107,8 +107,7 @@ class InvoicesController < ApplicationController
       page = params[:page].to_i
       page_size = (params[:limit] || 10).to_i
 
-      #! Combine into one using query - present? not needed param wont find it anything..
-      # filter by params
+      #! Simplify..
       invoices = Invoice.all
       invoices = invoices.filter_by_status(params[:status]) if params[:status].present?
       invoices = invoices.filter_due_date(params[:due_date]) if params[:due_date].present?

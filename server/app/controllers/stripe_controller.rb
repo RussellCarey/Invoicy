@@ -36,7 +36,6 @@ class StripeController < ApplicationController
 
     # errors?
     def cancel_subscription
-        delete_now = params[:now]
         user_subscription_token = current_user.member_id
 
         if delete_now
@@ -88,14 +87,16 @@ class StripeController < ApplicationController
 
         case event.type            
             when 'customer.subscription.deleted'
-                ## Neeeds changing?
                 set_premium_member(event.data.object.metadata.user_id, false, nil)
 
             when 'invoice.payment_succeeded'
+                user_id = event.data.object.lines.data[0].metadata.user_id;
+
                 if event.data.object.lines.data[0].type === "subscription"
-                    set_premium_member(event.data.object.lines.data[0].metadata.user_id, true, event.data.object.lines.data[0].subscription)
+                    set_premium_member(user_id , true, event.data.object.lines.data[0].subscription)
                 else
-                    add_credits_to_user(event.data.object.lines.data[0].metadata.user_id, 200)
+                    # Hardcode for now..
+                    add_credits_to_user(user_id , 200)
                 end
         end
     end
@@ -103,7 +104,11 @@ class StripeController < ApplicationController
     private
     def check_user_id_admin
         return render json: { message: "You are not an admin and cannot access this resource" }, status: :unauthorized unless current_user.is_admin
-     end
+    end
+
+    def user_params
+      params.fetch(:user, {}).permit(:price_id, :qty, :product_id, :name, :price)
+    end
 end
 
 

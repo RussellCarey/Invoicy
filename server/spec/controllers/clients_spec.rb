@@ -31,37 +31,61 @@ RSpec.describe ClientsController, :type => :controller do
 
      context 'GET #show' do
         it 'Can find and return a single resource ONLY if it is owned by the user' do
-            # authenticated_header(request, test_user)
-            # get :all, as: :json
-            # expect(JSON.parse(response.body).length).to eq(1);
-            # assert_response :success
+            authenticated_header(request, test_user)
+            new_client = Fabricate(:client, user_id: test_user.id)
+            get :show, params: { id: new_client.id }, as: :json
+            assert_response :success
+        end
+
+        it 'Cannot get a client if not logged in' do
+            sign_out test_user
+            get :show, params: { id: 2 }, as: :json
+            assert_response :unauthorized
         end
     end
 
     context 'POST #create' do
         it 'Can create a new client' do
-            # authenticated_header(request, test_user)
-            # get :all, as: :json
-            # expect(JSON.parse(response.body).length).to eq(1);
-            # assert_response :success
+            authenticated_header(request, test_user)
+            post :create, params: {email: "testingclientt@test.com", first_name: "Mrrr", last_name: "Client", address_number: 36, address_street: "sdfsdf", address_city: '23423432', address_county: '243234', address_postcode: "PO33RFV", user_id: test_user.id}, as: :json
+            assert_response :created
+        end
+
+         it 'Cannot post client if not logged in' do
+            sign_out test_user
+
+            post :create, params: {email: "testingclientt@test.com", first_name: "Mrrr", last_name: "Client", address_number: 36, address_street: "sdfsdf", address_city: '23423432', address_county: '243234', address_postcode: "PO33RFV", user_id: test_user.id}, as: :json
+            assert_response :unauthorized
         end
     end
 
     context 'PATCH #update' do
-        it 'Can update an existing client' do
-            # authenticated_header(request, test_user)
-            # get :all, as: :json
-            # expect(JSON.parse(response.body).length).to eq(1);
-            # assert_response :success
+         it 'Can updated a new client' do
+            authenticated_header(request, test_user)
+            patch :update, params: {email: "edited@test.com", first_name: "Mrrr", last_name: "Client", address_number: 36, address_street: "sdfsdf", address_city: '23423432', address_county: '243234', address_postcode: "PO33RFV", user_id: test_user.id}, as: :json
+            assert_response :updated
+        end
+
+         it 'Cannot updated client if not logged in' do
+            sign_out test_user
+
+            patch :update, params: {email: "edited@test.com", first_name: "Mrrr", last_name: "Client", address_number: 36, address_street: "sdfsdf", address_city: '23423432', address_county: '243234', address_postcode: "PO33RFV", user_id: test_user.id}, as: :json
+            assert_response :unauthorized
         end
     end
 
     context 'DELETE #destroy' do
-        it 'Can delete an existing client' do
-            # authenticated_header(request, test_user)
-            # get :all, as: :json
-            # expect(JSON.parse(response.body).length).to eq(1);
-            # assert_response :success
+        it 'Can delete a client' do
+            authenticated_header(request, test_user)
+            delete :destory, params: {id: 3}, as: :json            
+            assert_response :deleted
+        end
+
+         it 'Can not delete client if not logged in' do
+            sign_out test_user
+
+            delete :destory, params: {id: 3}, as: :json
+            assert_response :unauthorized
         end
     end
 

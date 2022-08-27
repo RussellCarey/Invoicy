@@ -45,7 +45,7 @@ RSpec.describe Invoice do
 
     context 'helper methods' do
         let(:user) { Fabricate(:user ) }
-        let(:client) { Fabricate(:client ) }
+        let(:client) { Fabricate(:client, user_id: user.id ) }
         let(:invoice) { Fabricate(:invoice, client_id: client.id, user_id: user.id ) }
         
         it 'sets discount and tax to 0 if nothing is entered' do
