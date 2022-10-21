@@ -13,17 +13,19 @@ class StripeController < ApplicationController
     def create_checkout_session
         price_id = params[:price_id]
         product_qty = params[:qty]
+
         return render json: { message: "Missing price or qty"}, status: :not_found if price_id.nil? || product_qty.nil?
 
-        session = create_payment(4, price_id, product_qty);
+        session = create_payment(price_id, product_qty);
         render json: {sessionURL:  session.url}, status: :ok
     end
 
     def create_subscription_session
         price_id = params[:price_id]
+        
         return render json: { message: "Missing price or qty"}, status: :not_found if price_id.nil?
 
-        session = create_subscription(4, price_id, 1);
+        session = create_subscription(price_id, 1);
         render json: {sessionURL:  session.url}, status: :ok
     end
     
@@ -47,8 +49,8 @@ class StripeController < ApplicationController
 
     # Products
     def create_product
-        product_name = params[:name]
-        product_price = params[:price]
+        product_name = params[:product_id]
+        product_price = params[:price_id]
 
         price_data = {
             currency: 'jpy',

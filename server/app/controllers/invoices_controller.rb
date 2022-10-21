@@ -1,5 +1,6 @@
 class InvoicesController < ApplicationController
   include CheckAdmin
+  include PdfUtils
 
   before_action :authenticate_user!
   before_action :set_invoice, only: %i[ show update destroy send_invoice_email download_invoice_pdf ]
@@ -55,23 +56,19 @@ class InvoicesController < ApplicationController
 
   # SEND EMAIL WITH PDF INVOICE /invoices/1/send_email
   def send_invoice_email
-    @client = @invoice.client
-    @invoice_items = @invoice.invoice_items
-    
-    pdf = convert_html_to_pdf
+    client = @invoice.client
+    pdf = convert_html_to_pdf(client, @invoice);
 
     ##### UPDATE LAST SEND DATE IN INVOICE
-
     InvoiceMailer.with(client: @client, invoice: @invoice, invoice_items: @invoice_items, attachment: pdf, attachment_type: ".pdf").invoice_email.deliver_now
     render json: { message: "Email sent!"}, status: :ok
   end 
 
   # DOWNLOAD FILE invoices/:id/download_invoice_pdf
   def download_invoice_pdf
-    @client = @invoice.client
-    @invoice_items = @invoice.invoice_items
+    client = @invoice.client
+    pdf = convert_html_to_pdf(client, @invoice);
 
-    pdf = convert_html_to_pdf
     send_data pdf, filename: "invoice.pdf", type: "application/pdf"
   end
 
@@ -90,17 +87,6 @@ class InvoicesController < ApplicationController
       if(@invoice.user_id != current_user.id)
         return render json: { message: "You dont not own this resource"}, status: :unauthorized
       end
-    end
-
-    def convert_html_to_pdf
-      html = ActionController::Base.new.render_to_string(
-        template: 'invoice_mailer/invoice_pdf',
-        formats: [:html],
-        locals: { :client => @client, :invoice => @invoice, :invoice_items => @invoice_items },
-        layout: false
-      )
-
-      pdf = Grover.new(html, format: 'A4').to_pdf
     end
 
     def search_invoice_with_params
@@ -123,20 +109,4 @@ class InvoicesController < ApplicationController
 
       return invoices
     end
-
-    # def search_invoice_with_params
-    #   page = params[:page].to_i
-    #   page_size = (params[:limit] || 10).to_i
-
-    #   param_list = ['status', 'due_date', 'due_date_gt', 'due_date_lt', 'issue_date', 'issue_date_gt', 'issue_date_lt', 'total', 'total_gt', 'total_lt']
-    #   invoices = Invoice.all
-      
-    #   param_list.each do |par|
-    #      invoices = invoices.filter_by_status(params[par]) if params[par].present?
-    #   end
-
-    #   invoices.offset(page * page_size).limit(page_size)
-
-    #   return invoices
-    # end
 end

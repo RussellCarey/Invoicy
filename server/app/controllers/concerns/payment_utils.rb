@@ -1,28 +1,28 @@
 module PaymentUtils
     extend ActiveSupport::Concern
 
-        def create_payment(user_id, price_id, product_qty)
+        def create_payment(price_id, product_qty)
             return session = Stripe::Checkout::Session.create({
                 mode: 'payment',
                 line_items: [{
                     price: price_id,
                     quantity: product_qty,
                 }],
-                payment_intent_data: { metadata: { user_id: user_id}},
+                payment_intent_data: { metadata: { user_id: current_user.id}},
                 metadata: { user_id: current_user.id },
                 success_url: 'https://localhost:3000/success.html',
                 cancel_url: 'https://localhost:3000/cancel.html',
             })
         end
 
-        def create_subscription(user_id, price_id, product_qty)
+        def create_subscription(price_id, product_qty)
             return session = Stripe::Checkout::Session.create({
                 mode: 'subscription',
                 line_items: [{
                     price: price_id,
                     quantity: product_qty,
                 }],
-                subscription_data: { metadata: { user_id: 4 }},
+                subscription_data: { metadata: { user_id: current_user.id }},
                 success_url: 'https://localhost:3000/success.html',
                 cancel_url: 'https://localhost:3000/cancel.html',
             })
